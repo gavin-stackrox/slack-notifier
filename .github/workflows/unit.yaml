@@ -11,6 +11,7 @@ on:
     - opened
     - reopened
     - synchronize
+  workflow_call:
 jobs:
   passAfailB:
     strategy:
@@ -23,11 +24,13 @@ jobs:
       run: |
         [[ "${{ matrix.var }}" == "A" ]]
   next:
+    env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     if: failure()
     needs:
     - passAfailB
     runs-on: ubuntu-latest
     steps:
-    - name: What do we know?
+    - name: What can we learn?
       run: |
-        echo "${{ toJson(steps) }}"
+        gh run view --jq '.' -R "${{ github.repository }}" "${{ github.workflow }}"
