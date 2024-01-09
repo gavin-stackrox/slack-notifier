@@ -43,7 +43,9 @@ jobs:
             - name: Build message
               id: message
               run: |
-                echo "message=${{ github.workflow }} failed." >> "$GITHUB_OUTPUT"
+                message="${{ github.workflow }} failed."
+                message+="\nCommit: ${{ github.event.head_commit.message }}."
+                echo "message=${message}" >> "$GITHUB_OUTPUT"
 
             - name: Send custom JSON data to Slack workflow
               uses: slackapi/slack-github-action@v1.24.0
