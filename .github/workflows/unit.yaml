@@ -22,3 +22,12 @@ jobs:
     - name: Check
       run: |
         [[ "${{ matrix.var }}" == "A" ]]
+  next:
+    if: failure()
+    needs:
+    - passAfailB
+    runs-on: ubuntu-latest
+    steps:
+    - name: What do we know?
+      run: |
+        echo "${{ toJson(steps) }}"
