@@ -33,4 +33,4 @@ jobs:
     steps:
     - name: What can we learn?
       run: |
-        gh run view --jq '.' --json 'jobs' -R "${{ github.repository }}" "${{ github.workflow }}"
+        gh run view --jq '.' --json 'jobs' -R "${{ github.repository }}" "${{ github.run_id }}"
