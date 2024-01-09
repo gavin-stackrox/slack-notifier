@@ -1,0 +1,23 @@
+name: Unit Tests
+on:
+  push:
+    tags:
+    - '*'
+    branches:
+    - main
+    - release-*
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - synchronize
+jobs:
+  passAfailB:
+    strategy:
+      matrix:
+        var: [ 'A', 'B' ]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check
+      run: |
+        [[ "${{ matrix.var }}" == "A" ]]
