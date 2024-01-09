@@ -23,7 +23,7 @@ jobs:
               run: |
                 [[ "${{ matrix.var }}" == "A" ]]
 
-    next:
+    slack-on-failure:
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: failure()
@@ -40,18 +40,23 @@ jobs:
               run: |
                 echo '${{ toJson(github) }}'
 
+            - name: Build message
+              id: message
+              run: |
+                echo "message=${{ github.workflow }} failed." >> "$GITHUB_OUTPUT"
+
             - name: Send custom JSON data to Slack workflow
               uses: slackapi/slack-github-action@v1.24.0
               with:
                 payload: |
                     {
-                        "text": "${{ github.workflow }} failed.",
+                        "text": "${{ steps.message.outputs.message }}",
                         "blocks": [
                             {
                                 "type": "section",
                                 "text": {
                                     "type": "mrkdwn",
-                                    "text": "${{ github.workflow }} failed."
+                                    "text": "${{ steps.message.outputs.message }}"
                                 }
                             }
                         ]
