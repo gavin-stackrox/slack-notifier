@@ -26,43 +26,57 @@ jobs:
     slack-on-failure:
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            SLACK_CI_INTEGRATION_TESTING_WEBHOOK: ${{ secrets.SLACK_CI_INTEGRATION_TEST_WEBHOOK }}
         if: failure()
         needs:
             - passAfailB
         runs-on: ubuntu-latest
+        # container:
+        #     image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
         steps:
-            - name: What can we learn (failed jobs)?
-              run: |
-                # .jobs from this filtered to conclusion "failure" will give us name and url for the failing jobs
-                gh run view --jq '.' --json 'jobs' -R "${{ github.repository }}" "${{ github.run_id }}" 
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            repository: stackrox/stackrox
+            ref: gavin/99pc/slack-workflow-failure
+          
+        - name: Slack message
+          run: |
+            source scripts/ci/lib.sh
+            slack_workflow_failure '${{ toJson(github) }}'
 
-            - name: What can we learn (actor + commit)
-              run: |
-                echo '${{ toJson(github) }}'
+        # - name: What can we learn (failed jobs)?
+        #   run: |
+        #     # .jobs from this filtered to conclusion "failure" will give us name and url for the failing jobs
+        #     gh run view --jq '.' --json 'jobs' -R "${{ github.repository }}" "${{ github.run_id }}" 
 
-            - name: Build message
-              id: message
-              run: |
-                message="${{ github.workflow }} failed."
-                message+="\nCommit: ${{ github.event.head_commit.message }}."
-                echo "message=${message}" >> "$GITHUB_OUTPUT"
+        # - name: What can we learn (actor + commit)
+        #   run: |
+        #     echo '${{ toJson(github) }}'
 
-            - name: Send custom JSON data to Slack workflow
-              uses: slackapi/slack-github-action@v1.24.0
-              with:
-                payload: |
-                    {
-                        "text": "${{ steps.message.outputs.message }}",
-                        "blocks": [
-                            {
-                                "type": "section",
-                                "text": {
-                                    "type": "mrkdwn",
-                                    "text": "${{ steps.message.outputs.message }}"
-                                }
-                            }
-                        ]
-                    }
-              env:
-                SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_INTEGRATION_TEST_WEBHOOK }}
-                SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+        # - name: Build message
+        #   id: message
+        #   run: |
+        #     message="${{ github.workflow }} failed."
+        #     message+="\nCommit: ${{ github.event.head_commit.message }}."
+        #     echo "message=${message}" >> "$GITHUB_OUTPUT"
+
+        # - name: Send custom JSON data to Slack workflow
+        #   uses: slackapi/slack-github-action@v1.24.0
+        #   with:
+        #     payload: |
+        #         {
+        #             "text": "${{ steps.message.outputs.message }}",
+        #             "blocks": [
+        #                 {
+        #                     "type": "section",
+        #                     "text": {
+        #                         "type": "mrkdwn",
+        #                         "text": "${{ steps.message.outputs.message }}"
+        #                     }
+        #                 }
+        #             ]
+        #         }
+        #   env:
+        #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_INTEGRATION_TEST_WEBHOOK }}
+        #     SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
