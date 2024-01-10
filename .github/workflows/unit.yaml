@@ -23,6 +23,11 @@ jobs:
               run: |
                 [[ "${{ matrix.var }}" == "A" ]]
 
+    anotherFail:
+        runs-on: ubuntu-latest
+        steps:
+            - run: false
+
     slack-on-failure:
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
